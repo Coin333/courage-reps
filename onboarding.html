@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courage Reps - Onboarding</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="onboarding-page">
+    <div class="onboarding-container">
+        <!-- Step 1: Welcome -->
+        <div class="onboarding-step active" data-step="1">
+            <div class="onboarding-content">
+                <h1 class="onboarding-title">Welcome to Courage Reps</h1>
+                <p class="onboarding-text">
+                    You've been invited to join a private network of serious self-improvers
+                    focused on building social courage through structured daily practice.
+                </p>
+                <div class="onboarding-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22c-4-2.5-8-5.5-8-11V5l8-3 8 3v6c0 5.5-4 8.5-8 11z"/>
+                    </svg>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-large" onclick="nextStep()">Continue</button>
+        </div>
+
+        <!-- Step 2: Philosophy -->
+        <div class="onboarding-step" data-step="2">
+            <div class="onboarding-content">
+                <h2 class="onboarding-title">The Philosophy</h2>
+                <div class="philosophy-points">
+                    <div class="philosophy-point">
+                        <span class="philosophy-number">1</span>
+                        <div class="philosophy-text">
+                            <strong>Social skills are trainable.</strong>
+                            <p>Like any muscle, they grow with consistent practice.</p>
+                        </div>
+                    </div>
+                    <div class="philosophy-point">
+                        <span class="philosophy-number">2</span>
+                        <div class="philosophy-text">
+                            <strong>Daily reps compound.</strong>
+                            <p>Small daily challenges create lasting transformation.</p>
+                        </div>
+                    </div>
+                    <div class="philosophy-point">
+                        <span class="philosophy-number">3</span>
+                        <div class="philosophy-text">
+                            <strong>Accountability accelerates growth.</strong>
+                            <p>Private accountability with trusted friends increases follow-through.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-large" onclick="nextStep()">I Understand</button>
+        </div>
+
+        <!-- Step 3: System Overview -->
+        <div class="onboarding-step" data-step="3">
+            <div class="onboarding-content">
+                <h2 class="onboarding-title">How It Works</h2>
+                <div class="system-overview">
+                    <div class="system-item">
+                        <div class="system-icon">📋</div>
+                        <div class="system-text">
+                            <strong>Daily Challenges</strong>
+                            <p>One structured challenge per day matched to your level.</p>
+                        </div>
+                    </div>
+                    <div class="system-item">
+                        <div class="system-icon">📈</div>
+                        <div class="system-text">
+                            <strong>XP & Leveling</strong>
+                            <p>Earn experience points and unlock harder challenges.</p>
+                        </div>
+                    </div>
+                    <div class="system-item">
+                        <div class="system-icon">🔥</div>
+                        <div class="system-text">
+                            <strong>Streaks</strong>
+                            <p>Build consistency with streak tracking and bonuses.</p>
+                        </div>
+                    </div>
+                    <div class="system-item">
+                        <div class="system-icon">👥</div>
+                        <div class="system-text">
+                            <strong>Friends</strong>
+                            <p>Connect with accountability partners privately.</p>
+                        </div>
+                    </div>
+                    <div class="system-item">
+                        <div class="system-icon">📚</div>
+                        <div class="system-text">
+                            <strong>Courses</strong>
+                            <p>Learn the theory behind effective social skills.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-large" onclick="nextStep()">Continue</button>
+        </div>
+
+        <!-- Step 4: Privacy Settings -->
+        <div class="onboarding-step" data-step="4">
+            <div class="onboarding-content">
+                <h2 class="onboarding-title">Privacy Settings</h2>
+                <p class="onboarding-text">Choose what friends can see about your progress.</p>
+                
+                <div class="privacy-options">
+                    <label class="privacy-option">
+                        <input type="checkbox" id="hide-level">
+                        <span class="privacy-label">Hide my level</span>
+                    </label>
+                    <label class="privacy-option">
+                        <input type="checkbox" id="hide-streak">
+                        <span class="privacy-label">Hide my streak</span>
+                    </label>
+                    <label class="privacy-option">
+                        <input type="checkbox" id="hide-reps">
+                        <span class="privacy-label">Hide total reps</span>
+                    </label>
+                    <label class="privacy-option">
+                        <input type="checkbox" id="hide-badges">
+                        <span class="privacy-label">Hide badges</span>
+                    </label>
+                </div>
+                
+                <p class="privacy-note">You can change these settings anytime in your profile.</p>
+            </div>
+            <button class="btn btn-primary btn-large" onclick="completeOnboarding()">Start Training</button>
+        </div>
+
+        <!-- Progress Dots -->
+        <div class="onboarding-progress">
+            <span class="progress-dot active" data-step="1"></span>
+            <span class="progress-dot" data-step="2"></span>
+            <span class="progress-dot" data-step="3"></span>
+            <span class="progress-dot" data-step="4"></span>
+        </div>
+    </div>
+
+    <script src="js/supabase.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            let currentStep = 1;
+            const totalSteps = 4;
+
+            window.nextStep = function() {
+                if (currentStep < totalSteps) {
+                    // Hide current step
+                    document.querySelector(`.onboarding-step[data-step="${currentStep}"]`).classList.remove('active');
+                    document.querySelector(`.progress-dot[data-step="${currentStep}"]`).classList.remove('active');
+                    
+                    // Show next step
+                    currentStep++;
+                    document.querySelector(`.onboarding-step[data-step="${currentStep}"]`).classList.add('active');
+                    document.querySelector(`.progress-dot[data-step="${currentStep}"]`).classList.add('active');
+                }
+            };
+
+            window.completeOnboarding = async function() {
+                // Save privacy settings
+                const hideLevel = document.getElementById('hide-level').checked;
+                const hideStreak = document.getElementById('hide-streak').checked;
+                const hideReps = document.getElementById('hide-reps').checked;
+                const hideBadges = document.getElementById('hide-badges').checked;
+
+                try {
+                    // Update user profile
+                    await UserProfile.updateProfile({
+                        onboarding_completed: true
+                    });
+
+                    // Save privacy settings (in a real app, save to user_privacy table)
+                    localStorage.setItem('courageRepsPrivacy', JSON.stringify({
+                        hideLevel, hideStreak, hideReps, hideBadges
+                    }));
+
+                    // Redirect to dashboard
+                    window.location.href = 'dashboard.html';
+                } catch (err) {
+                    console.error('Onboarding error:', err);
+                    window.location.href = 'dashboard.html';
+                }
+            };
+
+            // Check auth
+            async function checkAuth() {
+                const isAuth = await SupabaseAuth.isAuthenticated();
+                if (!isAuth) {
+                    window.location.href = 'login.html';
+                }
+            }
+            checkAuth();
+        })();
+    </script>
+</body>
+</html>

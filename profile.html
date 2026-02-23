@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courage Reps - Profile</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <!-- Sticky Navigation Header -->
+    <nav class="sticky-nav" id="sticky-nav">
+        <div class="sticky-nav-content">
+            <span class="sticky-logo">COURAGE REPS</span>
+            <div class="sticky-nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="lessons.html" class="nav-link">Lessons</a>
+                <a href="badges.html" class="nav-link">Badges</a>
+                <a href="friends.html" class="nav-link">Friends</a>
+                <a href="profile.html" class="nav-link nav-link-profile active">Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container has-sticky-nav">
+        <header class="profile-header">
+            <div class="profile-avatar" id="profile-avatar">
+                <span class="avatar-initial" id="avatar-initial">?</span>
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-username" id="profile-username">Loading...</h1>
+                <span class="profile-title" id="profile-title">Initiate</span>
+            </div>
+        </header>
+
+        <main class="profile-container">
+            <!-- Stats Overview -->
+            <section class="profile-stats">
+                <div class="stat-card large">
+                    <span class="stat-card-value" id="profile-level">1</span>
+                    <span class="stat-card-label">Level</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-card-value" id="profile-xp">0</span>
+                    <span class="stat-card-label">Current XP</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-card-value" id="profile-streak">0</span>
+                    <span class="stat-card-label">Streak</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-card-value" id="profile-reps">0</span>
+                    <span class="stat-card-label">Total Reps</span>
+                </div>
+            </section>
+
+            <!-- XP Progress -->
+            <section class="profile-section">
+                <h3>XP Progress</h3>
+                <div class="xp-bar large">
+                    <div class="xp-fill" id="xp-fill" style="width: 0%"></div>
+                </div>
+                <p class="xp-label"><span id="xp-current">0</span> / <span id="xp-next">100</span> XP to next level</p>
+            </section>
+
+            <!-- Streak Freezes -->
+            <section class="profile-section">
+                <h3>Streak Protection</h3>
+                <div class="streak-freeze-info">
+                    <div class="freeze-count">
+                        <span class="freeze-icon">🛡️</span>
+                        <span class="freeze-number" id="freeze-count">0</span>
+                        <span class="freeze-label">Streak Freezes</span>
+                    </div>
+                    <p class="freeze-hint">Earn 1 freeze every 30 active days</p>
+                </div>
+            </section>
+
+            <!-- Privacy Settings -->
+            <section class="profile-section">
+                <h3>Privacy Settings</h3>
+                <p class="section-hint">Control what friends can see</p>
+                <div class="privacy-toggles">
+                    <label class="toggle-option">
+                        <span>Hide my level</span>
+                        <input type="checkbox" id="toggle-hide-level">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <label class="toggle-option">
+                        <span>Hide my streak</span>
+                        <input type="checkbox" id="toggle-hide-streak">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <label class="toggle-option">
+                        <span>Hide total reps</span>
+                        <input type="checkbox" id="toggle-hide-reps">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <label class="toggle-option">
+                        <span>Hide badges</span>
+                        <input type="checkbox" id="toggle-hide-badges">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <button class="btn btn-secondary btn-small" id="save-privacy-btn">Save Privacy Settings</button>
+            </section>
+
+            <!-- API Settings -->
+            <section class="profile-section api-settings">
+                <h3>AI Feedback Settings</h3>
+                <div class="api-key-input-wrapper">
+                    <input type="password" id="api-key-input" class="api-key-input" placeholder="OpenAI API Key (sk-...)">
+                    <button class="btn btn-small btn-primary" id="save-api-key-btn">Save</button>
+                </div>
+                <p class="api-key-status" id="api-key-status"></p>
+                <p class="api-key-hint">Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></p>
+            </section>
+
+            <!-- Account Actions -->
+            <section class="profile-section account-section">
+                <h3>Account</h3>
+                <div class="account-info">
+                    <p><strong>Email:</strong> <span id="account-email">Loading...</span></p>
+                    <p><strong>Member since:</strong> <span id="account-since">Loading...</span></p>
+                </div>
+                <div class="account-actions">
+                    <button class="btn btn-ghost" id="sign-out-btn">Sign Out</button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>V3 • Private • Structured • Transformational</p>
+        </footer>
+    </div>
+
+    <script src="js/feedback.js"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/sticky-nav.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            let profile = null;
+
+            async function init() {
+                // Require auth
+                const isAuth = await SupabaseAuth.requireAuth();
+                if (!isAuth) return;
+
+                // Load profile
+                profile = await UserProfile.getProfile();
+                if (!profile) {
+                    console.error('Failed to load profile');
+                    return;
+                }
+
+                renderProfile();
+                attachEventListeners();
+                loadPrivacySettings();
+                initApiKeyStatus();
+            }
+
+            function renderProfile() {
+                // Avatar
+                const initial = profile.username ? profile.username[0].toUpperCase() : '?';
+                document.getElementById('avatar-initial').textContent = initial;
+                
+                // Generate avatar color from seed
+                const seed = profile.avatar_seed || profile.username;
+                const hue = hashString(seed) % 360;
+                document.getElementById('profile-avatar').style.background = `hsl(${hue}, 50%, 40%)`;
+
+                // Info
+                document.getElementById('profile-username').textContent = '@' + profile.username;
+                document.getElementById('profile-title').textContent = profile.courage_title || 'Initiate';
+
+                // Stats
+                document.getElementById('profile-level').textContent = profile.level || 1;
+                document.getElementById('profile-xp').textContent = profile.xp || 0;
+                document.getElementById('profile-streak').textContent = profile.streak || 0;
+                document.getElementById('profile-reps').textContent = profile.total_reps || 0;
+                document.getElementById('freeze-count').textContent = profile.streak_freeze_count || 0;
+
+                // XP Progress
+                const xpForNextLevel = Challenges.getXPForLevel(profile.level || 1);
+                const xpPercent = Math.min(((profile.xp || 0) / xpForNextLevel) * 100, 100);
+                document.getElementById('xp-fill').style.width = `${xpPercent}%`;
+                document.getElementById('xp-current').textContent = profile.xp || 0;
+                document.getElementById('xp-next').textContent = xpForNextLevel;
+
+                // Account info
+                document.getElementById('account-email').textContent = profile.email;
+                const createdDate = new Date(profile.created_at);
+                document.getElementById('account-since').textContent = createdDate.toLocaleDateString('en-US', { 
+                    month: 'long', year: 'numeric' 
+                });
+            }
+
+            function hashString(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                return Math.abs(hash);
+            }
+
+            function loadPrivacySettings() {
+                const privacy = JSON.parse(localStorage.getItem('courageRepsPrivacy') || '{}');
+                document.getElementById('toggle-hide-level').checked = privacy.hideLevel || false;
+                document.getElementById('toggle-hide-streak').checked = privacy.hideStreak || false;
+                document.getElementById('toggle-hide-reps').checked = privacy.hideReps || false;
+                document.getElementById('toggle-hide-badges').checked = privacy.hideBadges || false;
+            }
+
+            function savePrivacySettings() {
+                const privacy = {
+                    hideLevel: document.getElementById('toggle-hide-level').checked,
+                    hideStreak: document.getElementById('toggle-hide-streak').checked,
+                    hideReps: document.getElementById('toggle-hide-reps').checked,
+                    hideBadges: document.getElementById('toggle-hide-badges').checked
+                };
+                localStorage.setItem('courageRepsPrivacy', JSON.stringify(privacy));
+                alert('Privacy settings saved');
+            }
+
+            function initApiKeyStatus() {
+                const apiKeyStatusEl = document.getElementById('api-key-status');
+                const apiKeyInputEl = document.getElementById('api-key-input');
+                
+                if (window.FeedbackSystem && window.FeedbackSystem.hasApiKey()) {
+                    apiKeyStatusEl.textContent = 'API key configured';
+                    apiKeyStatusEl.style.color = 'var(--color-success)';
+                    apiKeyInputEl.placeholder = '••••••••••••••••';
+                } else {
+                    apiKeyStatusEl.textContent = 'No API key set';
+                    apiKeyStatusEl.style.color = 'var(--color-text-muted)';
+                }
+            }
+
+            function saveApiKey() {
+                const apiKeyInputEl = document.getElementById('api-key-input');
+                const apiKeyStatusEl = document.getElementById('api-key-status');
+                const key = apiKeyInputEl.value.trim();
+                
+                if (!key) {
+                    if (window.FeedbackSystem) window.FeedbackSystem.setApiKey('');
+                    apiKeyStatusEl.textContent = 'API key removed';
+                    apiKeyStatusEl.style.color = 'var(--color-text-muted)';
+                    apiKeyInputEl.placeholder = 'OpenAI API Key (sk-...)';
+                    return;
+                }
+                
+                if (!key.startsWith('sk-')) {
+                    apiKeyStatusEl.textContent = 'Invalid key format';
+                    apiKeyStatusEl.style.color = 'var(--color-warning)';
+                    return;
+                }
+                
+                if (window.FeedbackSystem) window.FeedbackSystem.setApiKey(key);
+                apiKeyInputEl.value = '';
+                apiKeyInputEl.placeholder = '••••••••••••••••';
+                apiKeyStatusEl.textContent = 'API key saved';
+                apiKeyStatusEl.style.color = 'var(--color-success)';
+            }
+
+            async function signOut() {
+                if (confirm('Are you sure you want to sign out?')) {
+                    await SupabaseAuth.signOut();
+                }
+            }
+
+            function attachEventListeners() {
+                document.getElementById('save-privacy-btn').addEventListener('click', savePrivacySettings);
+                document.getElementById('save-api-key-btn').addEventListener('click', saveApiKey);
+                document.getElementById('sign-out-btn').addEventListener('click', signOut);
+            }
+
+            document.addEventListener('DOMContentLoaded', init);
+        })();
+    </script>
+</body>
+</html>

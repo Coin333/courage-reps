@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courage Reps - Friends</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <!-- Sticky Navigation Header -->
+    <nav class="sticky-nav" id="sticky-nav">
+        <div class="sticky-nav-content">
+            <span class="sticky-logo">COURAGE REPS</span>
+            <div class="sticky-nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="lessons.html" class="nav-link">Lessons</a>
+                <a href="badges.html" class="nav-link">Badges</a>
+                <a href="friends.html" class="nav-link active">Friends</a>
+                <a href="profile.html" class="nav-link nav-link-profile">Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container has-sticky-nav">
+        <header class="page-header">
+            <h1>Friends</h1>
+            <p class="page-subtitle">Private accountability network</p>
+        </header>
+
+        <main class="friends-container">
+            <!-- Add Friend Section -->
+            <section class="friends-section add-friend-section">
+                <h3>Add Friend</h3>
+                <div class="add-friend-form">
+                    <input type="text" id="friend-username" class="friend-input" placeholder="Enter username">
+                    <button class="btn btn-primary btn-small" id="send-request-btn">Send Request</button>
+                </div>
+                <p class="add-friend-status hidden" id="add-friend-status"></p>
+            </section>
+
+            <!-- Pending Requests -->
+            <section class="friends-section" id="pending-section">
+                <h3>Pending Requests <span class="badge-count" id="pending-count">0</span></h3>
+                <div class="pending-list" id="pending-list">
+                    <p class="empty-state">No pending requests</p>
+                </div>
+            </section>
+
+            <!-- Weekly Comparison -->
+            <section class="friends-section weekly-comparison" id="weekly-section">
+                <h3>This Week</h3>
+                <div class="weekly-stats" id="weekly-stats">
+                    <p class="empty-state">Add friends to see comparisons</p>
+                </div>
+            </section>
+
+            <!-- Friends List -->
+            <section class="friends-section">
+                <h3>Your Friends <span class="badge-count" id="friends-count">0</span></h3>
+                <div class="friends-list" id="friends-list">
+                    <p class="empty-state">No friends yet. Add some accountability partners!</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>V3 • Private • Structured • Transformational</p>
+        </footer>
+    </div>
+
+    <script src="js/supabase.js"></script>
+    <script src="js/sticky-nav.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            async function init() {
+                const isAuth = await SupabaseAuth.requireAuth();
+                if (!isAuth) return;
+
+                await loadFriends();
+                await loadPendingRequests();
+                await loadWeeklyComparison();
+                attachEventListeners();
+            }
+
+            async function loadFriends() {
+                const friends = await Friends.getFriends();
+                const friendsList = document.getElementById('friends-list');
+                const friendsCount = document.getElementById('friends-count');
+
+                friendsCount.textContent = friends.length;
+
+                if (friends.length === 0) {
+                    friendsList.innerHTML = '<p class="empty-state">No friends yet. Add some accountability partners!</p>';
+                    return;
+                }
+
+                friendsList.innerHTML = friends.map(friend => `
+                    <div class="friend-card">
+                        <div class="friend-avatar" style="background: hsl(${hashString(friend.avatar_seed || friend.username) % 360}, 50%, 40%)">
+                            <span>${friend.username[0].toUpperCase()}</span>
+                        </div>
+                        <div class="friend-info">
+                            <span class="friend-username">@${friend.username}</span>
+                            <span class="friend-title">${friend.courage_title || 'Initiate'}</span>
+                        </div>
+                        <div class="friend-stats">
+                            <span class="friend-stat">Lv${friend.level || 1}</span>
+                            <span class="friend-stat">🔥 ${friend.streak || 0}</span>
+                        </div>
+                        <button class="btn btn-ghost btn-small remove-friend-btn" data-id="${friend.friendshipId}">
+                            Remove
+                        </button>
+                    </div>
+                `).join('');
+
+                // Attach remove handlers
+                document.querySelectorAll('.remove-friend-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        if (confirm('Remove this friend?')) {
+                            await Friends.removeFriendship(btn.dataset.id);
+                            await loadFriends();
+                            await loadWeeklyComparison();
+                        }
+                    });
+                });
+            }
+
+            async function loadPendingRequests() {
+                const pending = await Friends.getPendingRequests();
+                const pendingList = document.getElementById('pending-list');
+                const pendingCount = document.getElementById('pending-count');
+                const pendingSection = document.getElementById('pending-section');
+
+                pendingCount.textContent = pending.length;
+
+                if (pending.length === 0) {
+                    pendingSection.classList.add('hidden');
+                    return;
+                }
+
+                pendingSection.classList.remove('hidden');
+                pendingList.innerHTML = pending.map(req => `
+                    <div class="pending-card">
+                        <div class="friend-avatar" style="background: hsl(${hashString(req.requester.avatar_seed || req.requester.username) % 360}, 50%, 40%)">
+                            <span>${req.requester.username[0].toUpperCase()}</span>
+                        </div>
+                        <div class="friend-info">
+                            <span class="friend-username">@${req.requester.username}</span>
+                            <span class="friend-title">${req.requester.courage_title || 'Initiate'}</span>
+                        </div>
+                        <div class="pending-actions">
+                            <button class="btn btn-primary btn-small accept-btn" data-id="${req.id}">Accept</button>
+                            <button class="btn btn-ghost btn-small decline-btn" data-id="${req.id}">Decline</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Attach handlers
+                document.querySelectorAll('.accept-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        await Friends.acceptRequest(btn.dataset.id);
+                        await loadPendingRequests();
+                        await loadFriends();
+                        await loadWeeklyComparison();
+                    });
+                });
+
+                document.querySelectorAll('.decline-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        await Friends.removeFriendship(btn.dataset.id);
+                        await loadPendingRequests();
+                    });
+                });
+            }
+
+            async function loadWeeklyComparison() {
+                const comparison = await Friends.getWeeklyComparison();
+                const weeklyStats = document.getElementById('weekly-stats');
+                const weeklySection = document.getElementById('weekly-section');
+
+                if (!comparison || (!comparison.highestStreak.username && !comparison.highestLevel.username)) {
+                    weeklySection.classList.add('hidden');
+                    return;
+                }
+
+                weeklySection.classList.remove('hidden');
+                weeklyStats.innerHTML = `
+                    <div class="weekly-stat-card">
+                        <span class="weekly-stat-label">Highest Streak</span>
+                        <span class="weekly-stat-value">🔥 ${comparison.highestStreak.streak}</span>
+                        <span class="weekly-stat-user">@${comparison.highestStreak.username}</span>
+                    </div>
+                    <div class="weekly-stat-card">
+                        <span class="weekly-stat-label">Highest Level</span>
+                        <span class="weekly-stat-value">Lv${comparison.highestLevel.level}</span>
+                        <span class="weekly-stat-user">@${comparison.highestLevel.username}</span>
+                    </div>
+                `;
+            }
+
+            async function sendFriendRequest() {
+                const usernameInput = document.getElementById('friend-username');
+                const statusEl = document.getElementById('add-friend-status');
+                const username = usernameInput.value.trim().toLowerCase();
+
+                if (!username) {
+                    statusEl.textContent = 'Please enter a username';
+                    statusEl.className = 'add-friend-status error';
+                    statusEl.classList.remove('hidden');
+                    return;
+                }
+
+                const { data, error } = await Friends.sendRequest(username);
+
+                if (error) {
+                    statusEl.textContent = error.message;
+                    statusEl.className = 'add-friend-status error';
+                } else {
+                    statusEl.textContent = 'Friend request sent!';
+                    statusEl.className = 'add-friend-status success';
+                    usernameInput.value = '';
+                }
+
+                statusEl.classList.remove('hidden');
+                setTimeout(() => statusEl.classList.add('hidden'), 3000);
+            }
+
+            function hashString(str) {
+                let hash = 0;
+                for (let i = 0; i < (str || '').length; i++) {
+                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                return Math.abs(hash);
+            }
+
+            function attachEventListeners() {
+                document.getElementById('send-request-btn').addEventListener('click', sendFriendRequest);
+                document.getElementById('friend-username').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') sendFriendRequest();
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', init);
+        })();
+    </script>
+</body>
+</html>
