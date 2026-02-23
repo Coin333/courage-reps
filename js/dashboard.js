@@ -103,6 +103,11 @@
                 userData.level = 1;
             }
             if (userData.completedChallenges === undefined) userData.completedChallenges = [];
+            if (userData.xp === undefined) userData.xp = 0;
+            if (userData.streak === undefined) userData.streak = 0;
+            if (userData.bestStreak === undefined) userData.bestStreak = 0;
+            if (userData.totalCompleted === undefined) userData.totalCompleted = 0;
+            if (userData.totalXP === undefined) userData.totalXP = 0;
             
             // Initialize V2 fields if missing
             if (userData.refreshCountToday === undefined) userData.refreshCountToday = 0;
@@ -240,19 +245,19 @@
     // Update all UI elements
     function updateUI() {
         // Header stats
-        currentLevelEl.textContent = userData.level;
+        if (currentLevelEl) currentLevelEl.textContent = userData.level;
         if (levelTitleEl && typeof LEVEL_TITLES !== 'undefined') {
             levelTitleEl.textContent = LEVEL_TITLES[userData.level] || '';
         }
-        currentStreakEl.textContent = userData.streak;
+        if (currentStreakEl) currentStreakEl.textContent = userData.streak;
 
         // XP Section
         const xpNeeded = getXPNeededForNextLevel();
         const xpInCurrentLevel = userData.xp;
-        currentXPEl.textContent = xpInCurrentLevel;
-        xpToNextEl.textContent = xpNeeded;
+        if (currentXPEl) currentXPEl.textContent = xpInCurrentLevel;
+        if (xpToNextEl) xpToNextEl.textContent = xpNeeded;
         const xpPercentage = Math.min((xpInCurrentLevel / xpNeeded) * 100, 100);
-        xpFillEl.style.width = `${xpPercentage}%`;
+        if (xpFillEl) xpFillEl.style.width = `${xpPercentage}%`;
         
         if (nextLevelTitleEl && typeof LEVEL_TITLES !== 'undefined') {
             const nextLevel = Math.min(userData.level + 1, 6);
@@ -493,10 +498,11 @@
 
     // Check if user should level up
     function checkLevelUp() {
-        const xpNeeded = getXPNeededForNextLevel();
+        let xpNeeded = getXPNeededForNextLevel();
         while (userData.xp >= xpNeeded && userData.level < 6) {
             userData.xp -= xpNeeded;
             userData.level++;
+            xpNeeded = getXPNeededForNextLevel(); // Recalculate for new level
         }
     }
 

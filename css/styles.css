@@ -1506,11 +1506,28 @@ body {
 
 .badge-icon {
     font-size: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge-icon svg {
+    width: 28px;
+    height: 28px;
+    stroke: var(--color-accent);
+}
+
+.badge-card.earned .badge-icon svg {
+    stroke: var(--color-success);
 }
 
 .badge-card.locked .badge-icon {
     filter: grayscale(100%);
     opacity: 0.5;
+}
+
+.badge-card.locked .badge-icon svg {
+    stroke: var(--color-text-muted);
 }
 
 .badge-name {
