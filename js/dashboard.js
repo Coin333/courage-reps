@@ -64,6 +64,11 @@
     const inlineImprovementsListEl = document.getElementById('inline-improvements-list');
     const inlineNextFocusTextEl = document.getElementById('inline-next-focus-text');
     const completedFooterEl = document.getElementById('completed-footer');
+    
+    // API Key Elements
+    const apiKeyInputEl = document.getElementById('api-key-input');
+    const saveApiKeyBtnEl = document.getElementById('save-api-key-btn');
+    const apiKeyStatusEl = document.getElementById('api-key-status');
 
     // Initialize
     function init() {
@@ -85,6 +90,20 @@
         const data = localStorage.getItem('courageRepsData');
         if (data) {
             userData = JSON.parse(data);
+            console.debug('[CourageReps] Loaded userData:', {
+                level: userData.level,
+                challengeDate: userData.challengeDate,
+                currentChallenge: userData.currentChallenge ? userData.currentChallenge.substring(0, 30) + '...' : 'MISSING',
+                challengeCompleted: userData.challengeCompleted
+            });
+            
+            // Initialize critical fields if missing
+            if (userData.level === undefined || userData.level === null || isNaN(userData.level)) {
+                console.debug('[CourageReps] Level was undefined, defaulting to 1');
+                userData.level = 1;
+            }
+            if (userData.completedChallenges === undefined) userData.completedChallenges = [];
+            
             // Initialize V2 fields if missing
             if (userData.refreshCountToday === undefined) userData.refreshCountToday = 0;
             if (userData.refreshUsedOnCurrent === undefined) userData.refreshUsedOnCurrent = false;
@@ -104,40 +123,55 @@
     // Check if day has changed and handle accordingly
     function checkDayRollover() {
         const today = getDateString(new Date());
+        console.debug('[CourageReps] checkDayRollover:', { today, storedDate: userData.challengeDate, hasChallenge: !!userData.currentChallenge });
         
-        if (userData.challengeDate !== today) {
-            // Check if streak should reset (missed more than 1 day)
-            if (userData.lastCompletionDate) {
-                const lastCompletion = new Date(userData.lastCompletionDate);
-                const now = new Date();
-                const daysDiff = Math.floor((now - lastCompletion) / MS_PER_DAY);
-                
-                if (daysDiff > 1) {
-                    // Check for grace token
-                    if (isGraceTokenAvailable() && daysDiff === 2) {
-                        // Use grace token automatically
-                        userData.graceTokenUsedDate = today;
-                    } else {
-                        // Streak broken
-                        userData.streak = 0;
+        // Need new challenge if: date changed OR challenge is missing
+        const needsNewChallenge = userData.challengeDate !== today || !userData.currentChallenge;
+        
+        if (needsNewChallenge) {
+            console.debug('[CourageReps] Generating new challenge. Reason:', userData.challengeDate !== today ? 'new day' : 'missing challenge');
+            
+            // Only process streak logic if it's actually a new day
+            if (userData.challengeDate !== today) {
+                // Check if streak should reset (missed more than 1 day)
+                if (userData.lastCompletionDate) {
+                    const lastCompletion = new Date(userData.lastCompletionDate);
+                    const now = new Date();
+                    const daysDiff = Math.floor((now - lastCompletion) / MS_PER_DAY);
+                    
+                    if (daysDiff > 1) {
+                        // Check for grace token
+                        if (isGraceTokenAvailable() && daysDiff === 2) {
+                            // Use grace token automatically
+                            userData.graceTokenUsedDate = today;
+                        } else {
+                            // Streak broken
+                            userData.streak = 0;
+                        }
                     }
                 }
+                
+                // Reset daily refresh count
+                userData.refreshCountToday = 0;
+                userData.refreshUsedOnCurrent = false;
             }
             
-            // Reset daily refresh count
-            userData.refreshCountToday = 0;
-            userData.refreshUsedOnCurrent = false;
+            // Ensure level is valid
+            const level = userData.level || 1;
             
             // Determine difficulty for new challenge
-            const difficulty = getDifficultyForLevel(userData.level);
+            const difficulty = getDifficultyForLevel(level);
             userData.currentDifficulty = difficulty;
             
             // Generate new challenge for today
             const challenge = getUniqueDailyChallenge(
-                userData.level, 
+                level, 
                 userData.completedChallenges || [],
                 difficulty
             );
+            
+            console.debug('[CourageReps] Challenge generated:', { text: challenge.text?.substring(0, 30), difficulty: challenge.difficulty });
+            
             userData.currentChallenge = challenge.text;
             userData.challengeDifficulty = challenge.difficulty;
             userData.challengeDate = today;
@@ -226,8 +260,21 @@
         }
 
         // Challenge Section
-        challengeLevelEl.textContent = userData.level;
-        challengeTextEl.textContent = userData.currentChallenge || 'Loading challenge...';
+        challengeLevelEl.textContent = userData.level || 1;
+        
+        // Safety fallback: if challenge is still missing, generate one now
+        if (!userData.currentChallenge) {
+            console.debug('[CourageReps] Safety fallback: generating challenge in updateUI');
+            const level = userData.level || 1;
+            const difficulty = userData.currentDifficulty || 'standard';
+            const challenge = getUniqueDailyChallenge(level, userData.completedChallenges || [], difficulty);
+            userData.currentChallenge = challenge.text;
+            userData.challengeDifficulty = challenge.difficulty;
+            userData.challengeDate = getDateString(new Date());
+            saveUserData();
+        }
+        
+        challengeTextEl.textContent = userData.currentChallenge || 'Challenge unavailable. Please refresh the page.';
         
         if (challengeDifficultyEl) {
             challengeDifficultyEl.textContent = userData.challengeDifficulty || 'Standard';
@@ -474,7 +521,9 @@
         if (inlineFeedbackResultEl) inlineFeedbackResultEl.classList.add('hidden');
         
         try {
-            const analysis = await window.FeedbackSystem.analyzeInteraction(reflection);
+            // Pass challenge context to LLM for better analysis
+            const challengeContext = userData.currentChallenge || '';
+            const analysis = await window.FeedbackSystem.analyzeInteraction(reflection, challengeContext);
             
             if (inlineFeedbackLoadingEl) inlineFeedbackLoadingEl.classList.add('hidden');
             if (inlineFeedbackResultEl) inlineFeedbackResultEl.classList.remove('hidden');
@@ -552,6 +601,65 @@
         // Inline reflection handlers
         if (inlineAnalyzeBtnEl) inlineAnalyzeBtnEl.addEventListener('click', analyzeInlineReflection);
         if (inlineSkipBtnEl) inlineSkipBtnEl.addEventListener('click', skipReflection);
+        
+        // API key handler
+        if (saveApiKeyBtnEl) saveApiKeyBtnEl.addEventListener('click', saveApiKey);
+        
+        // Initialize API key status
+        initApiKeyStatus();
+    }
+    
+    // Initialize API key status display
+    function initApiKeyStatus() {
+        if (window.FeedbackSystem && window.FeedbackSystem.hasApiKey()) {
+            if (apiKeyStatusEl) {
+                apiKeyStatusEl.textContent = 'API key configured';
+                apiKeyStatusEl.style.color = 'var(--success-color)';
+            }
+            if (apiKeyInputEl) apiKeyInputEl.placeholder = '••••••••••••••••';
+        } else {
+            if (apiKeyStatusEl) {
+                apiKeyStatusEl.textContent = 'No API key set';
+                apiKeyStatusEl.style.color = 'var(--text-muted)';
+            }
+        }
+    }
+    
+    // Save API key
+    function saveApiKey() {
+        const key = apiKeyInputEl ? apiKeyInputEl.value.trim() : '';
+        
+        if (!key) {
+            // Clear key
+            if (window.FeedbackSystem) window.FeedbackSystem.setApiKey('');
+            if (apiKeyStatusEl) {
+                apiKeyStatusEl.textContent = 'API key removed';
+                apiKeyStatusEl.style.color = 'var(--text-muted)';
+            }
+            if (apiKeyInputEl) {
+                apiKeyInputEl.value = '';
+                apiKeyInputEl.placeholder = 'OpenAI API Key (sk-...)';
+            }
+            return;
+        }
+        
+        if (!key.startsWith('sk-')) {
+            if (apiKeyStatusEl) {
+                apiKeyStatusEl.textContent = 'Invalid key format (should start with sk-)';
+                apiKeyStatusEl.style.color = 'var(--warning-color, #f59e0b)';
+            }
+            return;
+        }
+        
+        if (window.FeedbackSystem) window.FeedbackSystem.setApiKey(key);
+        if (apiKeyInputEl) {
+            apiKeyInputEl.value = '';
+            apiKeyInputEl.placeholder = '••••••••••••••••';
+        }
+        if (apiKeyStatusEl) {
+            apiKeyStatusEl.textContent = 'API key saved';
+            apiKeyStatusEl.style.color = 'var(--success-color)';
+        }
     }
 
     // Start the app

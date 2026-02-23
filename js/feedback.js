@@ -1,122 +1,128 @@
 /**
  * COURAGE REPS V2 - Feedback System
- * Provides post-interaction analysis and coaching
- * Note: This is a simulated system that can be connected to a real LLM API later
+ * Provides post-interaction analysis and coaching via LLM
  */
 
 (function() {
     'use strict';
 
-    // Feedback templates for different types of interactions
-    const STRENGTH_TEMPLATES = [
-        "You took initiative by approaching the situation directly",
-        "You maintained composure during the interaction",
-        "You showed genuine interest in the other person",
-        "You used open body language signals",
-        "You listened actively before responding",
-        "You expressed yourself clearly and confidently",
-        "You stayed present in the conversation",
-        "You showed vulnerability appropriately",
-        "You adapted your approach based on feedback",
-        "You followed through despite discomfort"
-    ];
+    const STORAGE_KEY = 'courageRepsApiKey';
 
-    const IMPROVEMENT_TEMPLATES = [
-        "Consider making more direct eye contact",
-        "Try projecting your voice slightly louder",
-        "Practice pausing before responding to show thoughtfulness",
-        "Work on asking follow-up questions to deepen connection",
-        "Focus on open-ended questions rather than yes/no questions",
-        "Try to relax your shoulders and facial muscles",
-        "Consider sharing more about yourself to build rapport",
-        "Work on ending conversations gracefully",
-        "Practice expressing disagreement more directly",
-        "Focus on being present rather than planning your next words"
-    ];
+    // System prompt for social courage coaching
+    const SYSTEM_PROMPT = `You are a supportive social skills coach helping someone build confidence through daily social challenges. 
 
-    const NEXT_FOCUS_TEMPLATES = [
-        "For your next rep, focus on maintaining eye contact for 3+ seconds during key moments.",
-        "Next time, try to ask at least 2 follow-up questions to show genuine interest.",
-        "Your next challenge: initiate the conversation rather than waiting for the other person.",
-        "Focus on your body language - stand tall and take up space confidently.",
-        "Try to share something personal about yourself to build deeper connection.",
-        "Work on speaking at a slightly slower pace to convey confidence.",
-        "Challenge yourself to hold silence comfortably without rushing to fill it.",
-        "Next rep: aim to leave the other person feeling valued and heard.",
-        "Focus on your greeting - make it warm and memorable.",
-        "Try to steer the conversation toward meaningful topics rather than small talk."
-    ];
+Analyze their reported social interaction and provide constructive feedback. Be encouraging but specific and actionable.
 
-    // Analyze the interaction based on user input
-    function analyzeInteraction(userReflection) {
-        return new Promise((resolve) => {
-            // Simulate API delay
-            setTimeout(() => {
-                const analysis = generateAnalysis(userReflection);
-                resolve(analysis);
-            }, 1500 + Math.random() * 1000); // 1.5-2.5 second delay
-        });
+IMPORTANT: Respond ONLY with valid JSON in this exact format, no other text:
+{
+  "strengths": ["strength 1", "strength 2"],
+  "improvements": ["improvement 1", "improvement 2"],
+  "nextFocus": "One specific thing to focus on in the next interaction"
+}
+
+Guidelines:
+- Identify 1-3 specific things they did well based on what they described
+- Suggest 1-3 concrete, actionable improvements
+- Give one focused tip for their next social challenge
+- Keep each point concise (one sentence)
+- Be warm and encouraging, not critical
+- Focus on social courage aspects: approaching others, speaking up, vulnerability, presence`;
+
+    // Get stored API key
+    function getApiKey() {
+        return localStorage.getItem(STORAGE_KEY) || '';
     }
 
-    // Generate analysis based on reflection content
-    function generateAnalysis(reflection) {
-        const lowerReflection = reflection.toLowerCase();
-        const wordCount = reflection.split(/\s+/).length;
+    // Set API key
+    function setApiKey(key) {
+        if (key) {
+            localStorage.setItem(STORAGE_KEY, key.trim());
+        } else {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+    }
+
+    // Check if API key is configured
+    function hasApiKey() {
+        return !!getApiKey();
+    }
+
+    // Analyze interaction via OpenAI API
+    async function analyzeInteraction(userReflection, challengeContext) {
+        const apiKey = getApiKey();
         
-        // Determine number of points based on reflection detail
-        const strengthCount = wordCount > 30 ? 3 : wordCount > 15 ? 2 : 1;
-        const improvementCount = wordCount > 30 ? 3 : wordCount > 15 ? 2 : 1;
-
-        // Analyze sentiment and content
-        const positiveIndicators = [
-            'smiled', 'laughed', 'nodded', 'asked', 'listened', 'responded',
-            'confident', 'good', 'great', 'comfortable', 'natural', 'easy'
-        ];
-        const challengeIndicators = [
-            'nervous', 'awkward', 'uncomfortable', 'difficult', 'hard',
-            'struggled', 'forgot', 'stumbled', 'anxious', 'scared'
-        ];
-
-        const positiveScore = positiveIndicators.filter(word => lowerReflection.includes(word)).length;
-        const challengeScore = challengeIndicators.filter(word => lowerReflection.includes(word)).length;
-
-        // Select appropriate feedback
-        const strengths = selectFeedback(STRENGTH_TEMPLATES, strengthCount, positiveScore);
-        const improvements = selectFeedback(IMPROVEMENT_TEMPLATES, improvementCount, challengeScore);
-        const nextFocus = selectNextFocus(lowerReflection);
-
-        return {
-            strengths,
-            improvements,
-            nextFocus
-        };
-    }
-
-    // Select feedback items
-    function selectFeedback(templates, count, score) {
-        // Shuffle and select
-        const shuffled = [...templates].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, Math.max(1, Math.min(count, 3)));
-    }
-
-    // Select next focus area based on reflection content
-    function selectNextFocus(reflection) {
-        // Try to match focus to reflection content
-        if (reflection.includes('eye contact') || reflection.includes('look')) {
-            return NEXT_FOCUS_TEMPLATES[0];
+        if (!apiKey) {
+            return {
+                strengths: ["Add your OpenAI API key in settings to get AI-powered feedback"],
+                improvements: ["Go to Settings → API Key to enable analysis"],
+                nextFocus: "Configure your API key to receive personalized coaching"
+            };
         }
-        if (reflection.includes('question') || reflection.includes('ask')) {
-            return NEXT_FOCUS_TEMPLATES[1];
+
+        const userPrompt = challengeContext 
+            ? `Challenge completed: "${challengeContext}"\n\nUser's reflection on what happened:\n${userReflection}`
+            : `User's reflection on their social interaction:\n${userReflection}`;
+
+        try {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini',
+                    messages: [
+                        { role: 'system', content: SYSTEM_PROMPT },
+                        { role: 'user', content: userPrompt }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 500
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('OpenAI API error:', response.status, errorData);
+                
+                if (response.status === 401) {
+                    return {
+                        strengths: ["API key is invalid or expired"],
+                        improvements: ["Please update your OpenAI API key in settings"],
+                        nextFocus: "Go to Settings → API Key to fix this"
+                    };
+                }
+                
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const content = data.choices?.[0]?.message?.content;
+
+            if (!content) {
+                throw new Error('Empty response from API');
+            }
+
+            // Parse JSON response
+            const analysis = JSON.parse(content);
+            
+            // Validate structure
+            return {
+                strengths: Array.isArray(analysis.strengths) ? analysis.strengths : ["You took action on today's challenge"],
+                improvements: Array.isArray(analysis.improvements) ? analysis.improvements : ["Keep practicing daily"],
+                nextFocus: typeof analysis.nextFocus === 'string' ? analysis.nextFocus : "Focus on being present in your next interaction"
+            };
+
+        } catch (error) {
+            console.error('Feedback analysis error:', error);
+            
+            // Return fallback response on error
+            return {
+                strengths: ["You completed the challenge and reflected on it"],
+                improvements: ["Analysis unavailable - check console for details"],
+                nextFocus: "Continue practicing daily social challenges"
+            };
         }
-        if (reflection.includes('nervous') || reflection.includes('scared')) {
-            return NEXT_FOCUS_TEMPLATES[3];
-        }
-        if (reflection.includes('quiet') || reflection.includes('silent')) {
-            return NEXT_FOCUS_TEMPLATES[5];
-        }
-        
-        // Random selection if no match
-        return NEXT_FOCUS_TEMPLATES[Math.floor(Math.random() * NEXT_FOCUS_TEMPLATES.length)];
     }
 
     // Save reflection to user data
@@ -145,6 +151,9 @@
     // Export functions
     window.FeedbackSystem = {
         analyzeInteraction,
-        saveReflection
+        saveReflection,
+        getApiKey,
+        setApiKey,
+        hasApiKey
     };
 })();

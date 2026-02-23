@@ -142,6 +142,13 @@ body {
     background: var(--color-accent-dim);
 }
 
+/* Profile link - subtle differentiation */
+.nav-link-profile {
+    border-left: 1px solid var(--color-border);
+    margin-left: var(--space-xs);
+    padding-left: var(--space-md);
+}
+
 /* Container adjustment for sticky nav */
 .has-sticky-nav {
     padding-top: calc(var(--space-lg) + 50px);
@@ -372,7 +379,7 @@ body {
 
 .xp-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
+    background: var(--color-accent-hover);
     border-radius: 4px;
     transition: width var(--transition-normal);
 }
@@ -519,6 +526,68 @@ body {
     padding: var(--space-md) 0;
 }
 
+/* API Settings */
+.api-settings {
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--space-md);
+    padding-top: var(--space-lg);
+}
+
+.api-settings h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-md);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.api-key-input-wrapper {
+    display: flex;
+    gap: var(--space-sm);
+    max-width: 400px;
+    margin: 0 auto var(--space-sm);
+}
+
+.api-key-input {
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.85rem;
+    font-family: var(--font-family);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-primary);
+}
+
+.api-key-input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.api-key-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.api-key-status {
+    font-size: 0.8rem;
+    margin-bottom: var(--space-sm);
+}
+
+.api-key-hint {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.api-key-hint a {
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
+.api-key-hint a:hover {
+    text-decoration: underline;
+}
+
 /* =========================================
    BUTTONS - CLEAN MODERN STYLE
    ========================================= */
@@ -548,14 +617,14 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--color-accent), #3d8ae8);
+    background: var(--color-accent);
     color: white;
-    box-shadow: 0 2px 8px rgba(74, 158, 255, 0.3);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--color-accent-hover), #5a9ff0);
-    box-shadow: 0 4px 16px rgba(74, 158, 255, 0.4);
+    background: var(--color-accent-hover);
+    box-shadow: var(--shadow-md);
     transform: translateY(-1px);
 }
 
@@ -763,7 +832,7 @@ body {
 /* Version Badge */
 .version-badge {
     display: inline-block;
-    background: linear-gradient(135deg, var(--color-accent), #3d8ae8);
+    background: var(--color-accent);
     color: white;
     font-size: 0.6rem;
     font-weight: 700;
@@ -1007,7 +1076,7 @@ body {
 
 .streak-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-warning), #ff6b3d);
+    background: var(--color-warning);
     border-radius: 3px;
     transition: width var(--transition-normal);
 }
@@ -1400,7 +1469,7 @@ body {
 
 .badge-card.earned {
     border-color: var(--color-accent);
-    background: linear-gradient(180deg, var(--color-bg-card) 0%, var(--color-accent-dim) 100%);
+    background: var(--color-bg-card);
 }
 
 .badge-card.locked {
@@ -1414,7 +1483,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.3) 100%);
+    background: rgba(0, 0, 0, 0.2);
     pointer-events: none;
 }
 
@@ -1468,7 +1537,7 @@ body {
 
 .badge-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
+    background: var(--color-accent);
     border-radius: 2px;
     transition: width var(--transition-normal);
 }

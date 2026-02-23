@@ -18,6 +18,7 @@
                 <a href="dashboard.html" class="nav-link active">Dashboard</a>
                 <a href="lessons.html" class="nav-link">Lessons</a>
                 <a href="badges.html" class="nav-link">Badges</a>
+                <a href="#" class="nav-link nav-link-profile" id="profile-link">Profile</a>
             </div>
         </div>
     </nav>
@@ -171,6 +172,17 @@
                         <span class="stat-card-label">Badges</span>
                     </div>
                 </div>
+            </section>
+
+            <!-- API Settings -->
+            <section class="settings-section api-settings">
+                <h4>AI Feedback Settings</h4>
+                <div class="api-key-input-wrapper">
+                    <input type="password" id="api-key-input" class="api-key-input" placeholder="OpenAI API Key (sk-...)">
+                    <button class="btn btn-small btn-primary" id="save-api-key-btn">Save</button>
+                </div>
+                <p class="api-key-status" id="api-key-status"></p>
+                <p class="api-key-hint">Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></p>
             </section>
 
             <!-- Reset Option -->
