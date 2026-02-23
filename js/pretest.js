@@ -201,6 +201,12 @@
 
         assignedLevel.textContent = level;
         
+        // Show level title from challenges.js
+        const levelTitleEl = document.getElementById('level-title');
+        if (levelTitleEl && typeof LEVEL_TITLES !== 'undefined') {
+            levelTitleEl.textContent = LEVEL_TITLES[level] || '';
+        }
+        
         // Get level description from challenges.js
         if (typeof LEVEL_DESCRIPTIONS !== 'undefined') {
             levelDescription.textContent = LEVEL_DESCRIPTIONS[level];
@@ -213,6 +219,7 @@
     function startTraining() {
         const level = calculateLevel();
         
+        // V2 user data structure with all new fields
         const userData = {
             pretestCompleted: true,
             level: level,
@@ -221,12 +228,25 @@
             bestStreak: 0,
             totalCompleted: 0,
             totalXP: 0,
-            daysTrained: 0,
             lastCompletionDate: null,
             currentChallenge: null,
             challengeDate: null,
+            challengeCompleted: false,
+            challengeDifficulty: 'Standard',
             completedChallenges: [],
-            createdAt: new Date().toISOString()
+            // V2 fields
+            refreshCountToday: 0,
+            refreshUsedOnCurrent: false,
+            hardCompleted: 0,
+            eliteCompleted: 0,
+            noRefreshStreak: 0,
+            graceTokenUsedDate: null,
+            currentDifficulty: 'standard',
+            completedLessons: [],
+            reflections: [],
+            earnedBadges: [],
+            createdAt: new Date().toISOString(),
+            version: 2
         };
 
         localStorage.setItem('courageRepsData', JSON.stringify(userData));

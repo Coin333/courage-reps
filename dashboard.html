@@ -11,31 +11,43 @@
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <h1 class="logo">COURAGE REPS</h1>
+        <header class="header dashboard-header">
+            <div class="header-top">
+                <h1 class="logo">COURAGE REPS</h1>
+                <span class="version-badge">V2</span>
+            </div>
             <div class="header-stats">
                 <div class="stat">
                     <span class="stat-label">Level</span>
                     <span class="stat-value" id="current-level">1</span>
+                    <span class="stat-title" id="level-title">Social Awareness</span>
                 </div>
                 <div class="stat">
                     <span class="stat-label">Streak</span>
                     <span class="stat-value" id="current-streak">0</span>
+                    <span class="stat-sublabel">days</span>
                 </div>
             </div>
         </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tab-nav">
+            <a href="dashboard.html" class="tab-link active">Dashboard</a>
+            <a href="lessons.html" class="tab-link">Lessons</a>
+            <a href="badges.html" class="tab-link">Badges</a>
+        </nav>
 
         <main class="dashboard-container">
             <!-- XP Progress Section -->
             <section class="xp-section">
                 <div class="xp-header">
                     <span class="xp-label">Experience Points</span>
-                    <span class="xp-value"><span id="current-xp">0</span> / 70 XP</span>
+                    <span class="xp-value"><span id="current-xp">0</span> / <span id="xp-to-next">100</span> XP</span>
                 </div>
                 <div class="xp-bar">
                     <div class="xp-fill" id="xp-fill" style="width: 0%"></div>
                 </div>
-                <p class="xp-hint">Complete challenges to level up</p>
+                <p class="xp-hint">Next: <span id="next-level-title">Initiation</span></p>
             </section>
 
             <!-- Today's Challenge Section -->
@@ -49,42 +61,72 @@
                 </div>
 
                 <div class="challenge-card" id="challenge-card">
-                    <div class="challenge-level">Level <span id="challenge-level">1</span></div>
+                    <div class="challenge-meta">
+                        <span class="challenge-level">Level <span id="challenge-level">1</span></span>
+                        <span class="challenge-difficulty" id="challenge-difficulty">Standard</span>
+                    </div>
                     <p class="challenge-text" id="challenge-text">Loading challenge...</p>
+                    <div class="challenge-xp">
+                        <span class="xp-reward" id="xp-reward">+20 XP</span>
+                        <span class="xp-bonus hidden" id="xp-bonus">+10 No Refresh Bonus</span>
+                    </div>
                 </div>
 
                 <div class="challenge-actions">
                     <button class="btn btn-primary btn-large" id="complete-btn">
                         Complete Challenge
                     </button>
+                    <button class="btn btn-secondary" id="refresh-btn">
+                        <span class="refresh-icon">↻</span> Refresh (<span id="refresh-count">2</span> left)
+                    </button>
+                    <p class="refresh-warning hidden" id="refresh-warning">-20% XP on refreshed challenges</p>
                 </div>
 
                 <div class="challenge-completed hidden" id="completed-message">
                     <div class="completed-icon">✓</div>
                     <h3>Challenge Completed!</h3>
-                    <p>+10 XP earned. Come back tomorrow for your next challenge.</p>
+                    <p class="xp-earned" id="xp-earned">+20 XP earned</p>
+                    <button class="btn btn-primary" id="reflect-btn">Reflect on Interaction</button>
+                    <p class="reflect-skip">Come back tomorrow for your next challenge.</p>
                 </div>
             </section>
 
-            <!-- Stats Section -->
+            <!-- Streak Section -->
+            <section class="streak-section">
+                <div class="streak-header">
+                    <h3>Streak Status</h3>
+                    <div class="grace-token" id="grace-token">
+                        <span class="grace-icon">🛡</span>
+                        <span class="grace-label">Grace Token: <span id="grace-available">Available</span></span>
+                    </div>
+                </div>
+                <div class="streak-progress">
+                    <div class="streak-bar">
+                        <div class="streak-fill" id="streak-fill" style="width: 0%"></div>
+                    </div>
+                    <p class="streak-milestone">Next milestone: <span id="next-milestone">7</span> days (+50 XP)</p>
+                </div>
+            </section>
+
+            <!-- Quick Stats Section -->
             <section class="stats-section">
                 <h3>Your Progress</h3>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <span class="stat-card-value" id="total-completed">0</span>
-                        <span class="stat-card-label">Challenges Completed</span>
+                        <span class="stat-card-label">Reps Completed</span>
                     </div>
                     <div class="stat-card">
                         <span class="stat-card-value" id="total-xp">0</span>
-                        <span class="stat-card-label">Total XP Earned</span>
+                        <span class="stat-card-label">Total XP</span>
                     </div>
                     <div class="stat-card">
                         <span class="stat-card-value" id="best-streak">0</span>
                         <span class="stat-card-label">Best Streak</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-card-value" id="days-trained">0</span>
-                        <span class="stat-card-label">Days Trained</span>
+                        <span class="stat-card-value" id="badges-earned">0</span>
+                        <span class="stat-card-label">Badges</span>
                     </div>
                 </div>
             </section>
@@ -100,7 +142,48 @@
         </footer>
     </div>
 
+    <!-- Reflection Modal -->
+    <div class="modal hidden" id="reflection-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Post-Interaction Reflection</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="reflection-prompt">Describe what happened during your challenge. What did you say? How did they respond?</p>
+                <textarea class="reflection-input" id="reflection-input" placeholder="I approached someone and said..." rows="4"></textarea>
+                <button class="btn btn-primary" id="analyze-btn">Analyze Interaction</button>
+                
+                <div class="feedback-section hidden" id="feedback-section">
+                    <div class="feedback-loading hidden" id="feedback-loading">
+                        <div class="spinner"></div>
+                        <p>Analyzing your interaction...</p>
+                    </div>
+                    <div class="feedback-result hidden" id="feedback-result">
+                        <div class="feedback-block strengths">
+                            <h4>Strengths</h4>
+                            <ul id="strengths-list"></ul>
+                        </div>
+                        <div class="feedback-block improvements">
+                            <h4>Areas to Improve</h4>
+                            <ul id="improvements-list"></ul>
+                        </div>
+                        <div class="feedback-block next-focus">
+                            <h4>Next Rep Focus</h4>
+                            <p id="next-focus-text"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="skip-reflection">Skip</button>
+                <button class="btn btn-primary hidden" id="done-reflection">Done</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/challenges.js"></script>
+    <script src="js/feedback.js"></script>
     <script src="js/dashboard.js"></script>
 </body>
 </html>

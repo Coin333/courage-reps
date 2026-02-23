@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courage Reps - Badges</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header dashboard-header">
+            <div class="header-top">
+                <h1 class="logo">COURAGE REPS</h1>
+                <span class="version-badge">V2</span>
+            </div>
+            <div class="header-stats">
+                <div class="stat">
+                    <span class="stat-label">Level</span>
+                    <span class="stat-value" id="current-level">1</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Badges</span>
+                    <span class="stat-value" id="badges-count">0</span>
+                    <span class="stat-sublabel">/ 10</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tab-nav">
+            <a href="dashboard.html" class="tab-link">Dashboard</a>
+            <a href="lessons.html" class="tab-link">Lessons</a>
+            <a href="badges.html" class="tab-link active">Badges</a>
+        </nav>
+
+        <main class="badges-container">
+            <section class="badges-header">
+                <h2>Achievement Badges</h2>
+                <p class="badges-intro">Earn badges by hitting milestones. Visual recognition of your progress.</p>
+            </section>
+
+            <section class="badges-grid" id="badges-grid">
+                <!-- Badge cards will be inserted here -->
+            </section>
+
+            <section class="titles-section">
+                <h3>Unlocked Titles</h3>
+                <div class="titles-list" id="titles-list">
+                    <span class="title-badge locked">Initiate</span>
+                    <!-- Titles will be inserted here -->
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>Train daily. Build confidence. No shortcuts.</p>
+        </footer>
+    </div>
+
+    <script src="js/badges.js"></script>
+</body>
+</html>
