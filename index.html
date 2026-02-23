@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courage Reps - Assessment</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="logo">COURAGE REPS</h1>
+            <p class="tagline">Build your social confidence through daily training</p>
+        </header>
+
+        <main class="pretest-container">
+            <div class="progress-indicator">
+                <span id="current-question">1</span> / <span id="total-questions">5</span>
+            </div>
+
+            <div class="question-card" id="question-card">
+                <h2 class="question-text" id="question-text"></h2>
+                <div class="options-container" id="options-container">
+                    <!-- Options will be inserted here -->
+                </div>
+            </div>
+
+            <div class="results-card hidden" id="results-card">
+                <h2>Assessment Complete</h2>
+                <p class="results-text">Based on your responses, you'll start at:</p>
+                <div class="level-display">
+                    <span class="level-label">LEVEL</span>
+                    <span class="level-number" id="assigned-level">1</span>
+                </div>
+                <p class="level-description" id="level-description"></p>
+                <button class="btn btn-primary" id="start-training">Begin Training</button>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary hidden" id="prev-btn">Previous</button>
+                <button class="btn btn-primary hidden" id="next-btn">Next</button>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Train daily. Build confidence. No shortcuts.</p>
+        </footer>
+    </div>
+
+    <script src="js/challenges.js"></script>
+    <script src="js/pretest.js"></script>
+</body>
+</html>

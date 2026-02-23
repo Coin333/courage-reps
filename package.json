@@ -1,0 +1,27 @@
+{
+  "name": "courage-reps",
+  "version": "1.0.0",
+  "description": "A training-oriented web app that helps introverted teens build confidence through daily social challenges",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve . -l 3000",
+    "test": "echo \"Running validation...\" && node scripts/validate.js"
+  },
+  "keywords": [
+    "confidence",
+    "social-skills",
+    "training",
+    "self-improvement",
+    "challenges"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
