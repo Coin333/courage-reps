@@ -52,19 +52,18 @@
     const nextMilestoneEl = document.getElementById('next-milestone');
     const graceAvailableEl = document.getElementById('grace-available');
     
-    // Reflection Modal Elements
-    const reflectionModal = document.getElementById('reflection-modal');
-    const modalCloseEl = document.getElementById('modal-close');
-    const reflectionInputEl = document.getElementById('reflection-input');
-    const analyzeBtnEl = document.getElementById('analyze-btn');
-    const feedbackSectionEl = document.getElementById('feedback-section');
-    const feedbackLoadingEl = document.getElementById('feedback-loading');
-    const feedbackResultEl = document.getElementById('feedback-result');
-    const strengthsListEl = document.getElementById('strengths-list');
-    const improvementsListEl = document.getElementById('improvements-list');
-    const nextFocusTextEl = document.getElementById('next-focus-text');
-    const skipReflectionEl = document.getElementById('skip-reflection');
-    const doneReflectionEl = document.getElementById('done-reflection');
+    // Inline Reflection Elements
+    const inlineReflectionEl = document.getElementById('inline-reflection');
+    const inlineReflectionInputEl = document.getElementById('inline-reflection-input');
+    const inlineAnalyzeBtnEl = document.getElementById('inline-analyze-btn');
+    const inlineSkipBtnEl = document.getElementById('inline-skip-btn');
+    const inlineFeedbackEl = document.getElementById('inline-feedback');
+    const inlineFeedbackLoadingEl = document.getElementById('inline-feedback-loading');
+    const inlineFeedbackResultEl = document.getElementById('inline-feedback-result');
+    const inlineStrengthsListEl = document.getElementById('inline-strengths-list');
+    const inlineImprovementsListEl = document.getElementById('inline-improvements-list');
+    const inlineNextFocusTextEl = document.getElementById('inline-next-focus-text');
+    const completedFooterEl = document.getElementById('completed-footer');
 
     // Initialize
     function init() {
@@ -454,56 +453,58 @@
         }
     }
 
-    // Open reflection modal
-    function openReflectionModal() {
-        if (reflectionModal) {
-            reflectionModal.classList.remove('hidden');
-            reflectionInputEl.value = '';
-            feedbackSectionEl.classList.add('hidden');
-            feedbackLoadingEl.classList.add('hidden');
-            feedbackResultEl.classList.add('hidden');
-            doneReflectionEl.classList.add('hidden');
-            analyzeBtnEl.classList.remove('hidden');
-        }
+    // Skip reflection and show footer
+    function skipReflection() {
+        if (inlineReflectionEl) inlineReflectionEl.classList.add('hidden');
+        if (completedFooterEl) completedFooterEl.classList.remove('hidden');
     }
 
-    // Close reflection modal
-    function closeReflectionModal() {
-        if (reflectionModal) {
-            reflectionModal.classList.add('hidden');
-        }
-    }
-
-    // Analyze reflection
-    async function analyzeReflection() {
-        const reflection = reflectionInputEl.value.trim();
+    // Analyze inline reflection
+    async function analyzeInlineReflection() {
+        const reflection = inlineReflectionInputEl ? inlineReflectionInputEl.value.trim() : '';
         if (!reflection || reflection.length < 10) {
             alert('Please describe your interaction in more detail.');
             return;
         }
         
-        analyzeBtnEl.classList.add('hidden');
-        feedbackSectionEl.classList.remove('hidden');
-        feedbackLoadingEl.classList.remove('hidden');
-        feedbackResultEl.classList.add('hidden');
+        if (inlineAnalyzeBtnEl) inlineAnalyzeBtnEl.disabled = true;
+        if (inlineSkipBtnEl) inlineSkipBtnEl.classList.add('hidden');
+        if (inlineFeedbackEl) inlineFeedbackEl.classList.remove('hidden');
+        if (inlineFeedbackLoadingEl) inlineFeedbackLoadingEl.classList.remove('hidden');
+        if (inlineFeedbackResultEl) inlineFeedbackResultEl.classList.add('hidden');
         
         try {
             const analysis = await window.FeedbackSystem.analyzeInteraction(reflection);
             
-            feedbackLoadingEl.classList.add('hidden');
-            feedbackResultEl.classList.remove('hidden');
+            if (inlineFeedbackLoadingEl) inlineFeedbackLoadingEl.classList.add('hidden');
+            if (inlineFeedbackResultEl) inlineFeedbackResultEl.classList.remove('hidden');
             
-            strengthsListEl.innerHTML = analysis.strengths.map(s => `<li>${s}</li>`).join('');
-            improvementsListEl.innerHTML = analysis.improvements.map(i => `<li>${i}</li>`).join('');
-            nextFocusTextEl.textContent = analysis.nextFocus;
+            if (inlineStrengthsListEl) {
+                inlineStrengthsListEl.innerHTML = analysis.strengths.map(s => `<li>${s}</li>`).join('');
+            }
+            if (inlineImprovementsListEl) {
+                inlineImprovementsListEl.innerHTML = analysis.improvements.map(i => `<li>${i}</li>`).join('');
+            }
+            if (inlineNextFocusTextEl) {
+                inlineNextFocusTextEl.textContent = analysis.nextFocus;
+            }
             
-            doneReflectionEl.classList.remove('hidden');
+            // Hide input and buttons after analysis
+            if (inlineReflectionInputEl) inlineReflectionInputEl.classList.add('hidden');
+            if (inlineAnalyzeBtnEl) inlineAnalyzeBtnEl.classList.add('hidden');
+            
+            // Show footer
+            if (completedFooterEl) completedFooterEl.classList.remove('hidden');
             
             // Save reflection
             window.FeedbackSystem.saveReflection(reflection, analysis);
         } catch (error) {
-            feedbackLoadingEl.classList.add('hidden');
-            analyzeBtnEl.classList.remove('hidden');
+            if (inlineFeedbackLoadingEl) inlineFeedbackLoadingEl.classList.add('hidden');
+            if (inlineAnalyzeBtnEl) {
+                inlineAnalyzeBtnEl.disabled = false;
+                inlineAnalyzeBtnEl.classList.remove('hidden');
+            }
+            if (inlineSkipBtnEl) inlineSkipBtnEl.classList.remove('hidden');
             alert('Error analyzing reflection. Please try again.');
         }
     }
@@ -547,19 +548,10 @@
         if (completeBtnEl) completeBtnEl.addEventListener('click', completeChallenge);
         if (refreshBtnEl) refreshBtnEl.addEventListener('click', refreshChallenge);
         if (resetBtnEl) resetBtnEl.addEventListener('click', resetProgress);
-        if (reflectBtnEl) reflectBtnEl.addEventListener('click', openReflectionModal);
         
-        // Reflection modal
-        if (modalCloseEl) modalCloseEl.addEventListener('click', closeReflectionModal);
-        if (skipReflectionEl) skipReflectionEl.addEventListener('click', closeReflectionModal);
-        if (doneReflectionEl) doneReflectionEl.addEventListener('click', closeReflectionModal);
-        if (analyzeBtnEl) analyzeBtnEl.addEventListener('click', analyzeReflection);
-        
-        if (reflectionModal) {
-            reflectionModal.addEventListener('click', (e) => {
-                if (e.target === reflectionModal) closeReflectionModal();
-            });
-        }
+        // Inline reflection handlers
+        if (inlineAnalyzeBtnEl) inlineAnalyzeBtnEl.addEventListener('click', analyzeInlineReflection);
+        if (inlineSkipBtnEl) inlineSkipBtnEl.addEventListener('click', skipReflection);
     }
 
     // Start the app

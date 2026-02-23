@@ -10,7 +10,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <!-- Sticky Navigation Header -->
+    <nav class="sticky-nav" id="sticky-nav">
+        <div class="sticky-nav-content">
+            <span class="sticky-logo">COURAGE REPS</span>
+            <div class="sticky-nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="lessons.html" class="nav-link">Lessons</a>
+                <a href="badges.html" class="nav-link active">Badges</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container has-sticky-nav">
         <header class="header dashboard-header">
             <div class="header-top">
                 <h1 class="logo">COURAGE REPS</h1>
@@ -29,13 +41,6 @@
             </div>
         </header>
 
-        <!-- Navigation Tabs -->
-        <nav class="tab-nav">
-            <a href="dashboard.html" class="tab-link">Dashboard</a>
-            <a href="lessons.html" class="tab-link">Lessons</a>
-            <a href="badges.html" class="tab-link active">Badges</a>
-        </nav>
-
         <main class="badges-container">
             <section class="badges-header">
                 <h2>Achievement Badges</h2>
@@ -47,9 +52,9 @@
             </section>
 
             <section class="titles-section">
-                <h3>Unlocked Titles</h3>
+                <h3>Progression Titles</h3>
+                <p class="titles-intro">Titles unlock as you level up.</p>
                 <div class="titles-list" id="titles-list">
-                    <span class="title-badge locked">Initiate</span>
                     <!-- Titles will be inserted here -->
                 </div>
             </section>
@@ -61,5 +66,6 @@
     </div>
 
     <script src="js/badges.js"></script>
+    <script src="js/sticky-nav.js"></script>
 </body>
 </html>

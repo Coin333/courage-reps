@@ -10,7 +10,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <!-- Sticky Navigation Header -->
+    <nav class="sticky-nav" id="sticky-nav">
+        <div class="sticky-nav-content">
+            <span class="sticky-logo">COURAGE REPS</span>
+            <div class="sticky-nav-links">
+                <a href="dashboard.html" class="nav-link active">Dashboard</a>
+                <a href="lessons.html" class="nav-link">Lessons</a>
+                <a href="badges.html" class="nav-link">Badges</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container has-sticky-nav">
         <header class="header dashboard-header">
             <div class="header-top">
                 <h1 class="logo">COURAGE REPS</h1>
@@ -29,13 +41,6 @@
                 </div>
             </div>
         </header>
-
-        <!-- Navigation Tabs -->
-        <nav class="tab-nav">
-            <a href="dashboard.html" class="tab-link active">Dashboard</a>
-            <a href="lessons.html" class="tab-link">Lessons</a>
-            <a href="badges.html" class="tab-link">Badges</a>
-        </nav>
 
         <main class="dashboard-container">
             <!-- XP Progress Section -->
@@ -76,8 +81,12 @@
                     <button class="btn btn-primary btn-large" id="complete-btn">
                         Complete Challenge
                     </button>
-                    <button class="btn btn-secondary" id="refresh-btn">
-                        <span class="refresh-icon">↻</span> Refresh (<span id="refresh-count">2</span> left)
+                    <button class="btn btn-refresh" id="refresh-btn">
+                        <svg class="refresh-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                        </svg>
+                        <span>Refresh</span>
+                        <span class="refresh-badge" id="refresh-count">2</span>
                     </button>
                     <p class="refresh-warning hidden" id="refresh-warning">-20% XP on refreshed challenges</p>
                 </div>
@@ -86,8 +95,41 @@
                     <div class="completed-icon">✓</div>
                     <h3>Challenge Completed!</h3>
                     <p class="xp-earned" id="xp-earned">+20 XP earned</p>
-                    <button class="btn btn-primary" id="reflect-btn">Reflect on Interaction</button>
-                    <p class="reflect-skip">Come back tomorrow for your next challenge.</p>
+                    
+                    <!-- Inline Reflection Section -->
+                    <div class="inline-reflection" id="inline-reflection">
+                        <p class="reflection-prompt">Describe what happened. What did you say? How did they respond?</p>
+                        <textarea class="reflection-input" id="inline-reflection-input" placeholder="I approached someone and said..." rows="3"></textarea>
+                        <div class="reflection-actions">
+                            <button class="btn btn-primary btn-small" id="inline-analyze-btn">Analyze</button>
+                            <button class="btn btn-ghost btn-small" id="inline-skip-btn">Skip</button>
+                        </div>
+                        
+                        <div class="inline-feedback hidden" id="inline-feedback">
+                            <div class="feedback-loading hidden" id="inline-feedback-loading">
+                                <div class="spinner"></div>
+                                <p>Analyzing...</p>
+                            </div>
+                            <div class="feedback-result hidden" id="inline-feedback-result">
+                                <div class="feedback-block strengths">
+                                    <h4>Strengths</h4>
+                                    <ul id="inline-strengths-list"></ul>
+                                </div>
+                                <div class="feedback-block improvements">
+                                    <h4>Areas to Improve</h4>
+                                    <ul id="inline-improvements-list"></ul>
+                                </div>
+                                <div class="feedback-block next-focus">
+                                    <h4>Next Rep Focus</h4>
+                                    <p id="inline-next-focus-text"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="completed-footer hidden" id="completed-footer">
+                        <p class="reflect-skip">Come back tomorrow for your next challenge.</p>
+                    </div>
                 </div>
             </section>
 
@@ -142,48 +184,9 @@
         </footer>
     </div>
 
-    <!-- Reflection Modal -->
-    <div class="modal hidden" id="reflection-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Post-Interaction Reflection</h2>
-                <button class="modal-close" id="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p class="reflection-prompt">Describe what happened during your challenge. What did you say? How did they respond?</p>
-                <textarea class="reflection-input" id="reflection-input" placeholder="I approached someone and said..." rows="4"></textarea>
-                <button class="btn btn-primary" id="analyze-btn">Analyze Interaction</button>
-                
-                <div class="feedback-section hidden" id="feedback-section">
-                    <div class="feedback-loading hidden" id="feedback-loading">
-                        <div class="spinner"></div>
-                        <p>Analyzing your interaction...</p>
-                    </div>
-                    <div class="feedback-result hidden" id="feedback-result">
-                        <div class="feedback-block strengths">
-                            <h4>Strengths</h4>
-                            <ul id="strengths-list"></ul>
-                        </div>
-                        <div class="feedback-block improvements">
-                            <h4>Areas to Improve</h4>
-                            <ul id="improvements-list"></ul>
-                        </div>
-                        <div class="feedback-block next-focus">
-                            <h4>Next Rep Focus</h4>
-                            <p id="next-focus-text"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="skip-reflection">Skip</button>
-                <button class="btn btn-primary hidden" id="done-reflection">Done</button>
-            </div>
-        </div>
-    </div>
-
     <script src="js/challenges.js"></script>
     <script src="js/feedback.js"></script>
     <script src="js/dashboard.js"></script>
+    <script src="js/sticky-nav.js"></script>
 </body>
 </html>

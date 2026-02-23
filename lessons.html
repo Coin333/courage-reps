@@ -10,7 +10,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <!-- Sticky Navigation Header -->
+    <nav class="sticky-nav" id="sticky-nav">
+        <div class="sticky-nav-content">
+            <span class="sticky-logo">COURAGE REPS</span>
+            <div class="sticky-nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="lessons.html" class="nav-link active">Lessons</a>
+                <a href="badges.html" class="nav-link">Badges</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container has-sticky-nav">
         <header class="header dashboard-header">
             <div class="header-top">
                 <h1 class="logo">COURAGE REPS</h1>
@@ -28,13 +40,6 @@
                 </div>
             </div>
         </header>
-
-        <!-- Navigation Tabs -->
-        <nav class="tab-nav">
-            <a href="dashboard.html" class="tab-link">Dashboard</a>
-            <a href="lessons.html" class="tab-link active">Lessons</a>
-            <a href="badges.html" class="tab-link">Badges</a>
-        </nav>
 
         <main class="lessons-container">
             <section class="lessons-header">
@@ -88,5 +93,6 @@
     </div>
 
     <script src="js/lessons.js"></script>
+    <script src="js/sticky-nav.js"></script>
 </body>
 </html>

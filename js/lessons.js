@@ -274,10 +274,11 @@
                 <span class="lesson-icon">${lesson.icon}</span>
                 <div class="lesson-info">
                     <div class="lesson-title">${lesson.title}</div>
-                    <div class="lesson-subtitle">${lesson.drills.length} drills</div>
+                    <div class="lesson-subtitle">${lesson.drills.length} practice drills</div>
                 </div>
                 <div class="lesson-status">
-                    ${isCompleted ? '✓ Done' : '<span class="lesson-xp">+5 XP</span>'}
+                    <span class="lesson-status-icon">${isCompleted ? '✓' : ''}</span>
+                    ${isCompleted ? '' : '<span class="lesson-xp">+5 XP</span>'}
                 </div>
             `;
             
